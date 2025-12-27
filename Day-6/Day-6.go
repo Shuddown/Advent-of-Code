@@ -25,6 +25,39 @@ func performOp(operator rune, nums ...int) int {
 	}
 }
 
+func indexOf(row, col, numCols int) int {
+	return row*(numCols+1) + col
+}
+
+func part2(s string) [][]int {
+	numCols := strings.Index(s, "\n")
+	numRows := len(s)/numCols - 1
+	numString := strings.Builder{}
+	numStrings := make([]string, 0)
+	for i := range numCols {
+		for j := range numRows {
+			numString.WriteByte(s[indexOf(j, i, numCols)])
+		}
+		numStrings = append(numStrings, numString.String())
+		numString.Reset()
+	}
+	problems := make([][]int, 0)
+	problem := make([]int, 0)
+	for _, numString := range numStrings {
+		cleanedUpNumString := strings.TrimSpace(numString)
+		if cleanedUpNumString == "" {
+			problems = append(problems, problem)
+			problem = nil
+			continue
+		}
+		num, err := strconv.Atoi(cleanedUpNumString)
+		utils.HandleError(err)
+		problem = append(problem, num)
+	}
+	problems = append(problems, problem)
+	return problems
+}
+
 func main() {
 	inputFile, err := utils.GetInput(6)
 	utils.HandleError(err)
@@ -33,6 +66,7 @@ func main() {
 	utils.HandleError(err)
 
 	s := string(b)
+	problems := part2(s)
 	numsPerProblem := strings.Count(s, "\n") - 1
 	delimiter := " \n"
 	numsAndOperators := strings.FieldsFunc(s, func(r rune) bool {
@@ -43,6 +77,14 @@ func main() {
 	numProblems := l / (numsPerProblem + 1)
 	stringNums := numsAndOperators[:numProblems*numsPerProblem]
 	operators := numsAndOperators[numProblems*numsPerProblem:]
+	sum := 0
+	fmt.Println(operators)
+	fmt.Println(len(operators))
+	fmt.Println(len(problems))
+	for i := range problems {
+		sum += performOp([]rune(operators[i])[0], problems[i]...)
+	}
+	fmt.Println(sum)
 
 	nums := make([]int, len(stringNums))
 	for index := range stringNums {
@@ -50,7 +92,7 @@ func main() {
 		utils.HandleError(err)
 		nums[index] = num
 	}
-	sum := 0
+	sum = 0
 	for i := range numProblems {
 		problem := make([]int, 0, numsPerProblem)
 		for j := range numsPerProblem {
