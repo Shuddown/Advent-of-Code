@@ -23,8 +23,9 @@ func rowCol(index, numCols int) (int, int) {
 var totalCount = 0
 
 var totalIndex [][]int
+var splitters [][]*splitter
 
-func printNumSplitsPartOne(splitters [][]*splitter, row, col int) {
+func printNumSplitsPartOne(row, col int) {
 	for _, s := range splitters[col] {
 		if row < s.row {
 			if s.used {
@@ -32,21 +33,21 @@ func printNumSplitsPartOne(splitters [][]*splitter, row, col int) {
 			}
 			totalCount += 1
 			s.used = true
-			printNumSplitsPartOne(splitters, s.row, col+1)
-			printNumSplitsPartOne(splitters, s.row, col-1)
+			printNumSplitsPartOne(s.row, col+1)
+			printNumSplitsPartOne(s.row, col-1)
 			return
 		}
 	}
 }
 
-func printNumSplitsPartTwo(splitters [][]*splitter, row, col int) int {
+func printNumSplitsPartTwo(row, col int) int {
 	for _, s := range splitters[col] {
 		if row < s.row {
 			if totalIndex[s.row][col] != 0 {
 				return totalIndex[s.row][col]
 			}
-			totalIndex[s.row][col] += printNumSplitsPartTwo(splitters, s.row, col+1)
-			totalIndex[s.row][col] += printNumSplitsPartTwo(splitters, s.row, col-1)
+			totalIndex[s.row][col] += printNumSplitsPartTwo(s.row, col+1)
+			totalIndex[s.row][col] += printNumSplitsPartTwo(s.row, col-1)
 			return totalIndex[s.row][col]
 		}
 	}
@@ -65,7 +66,7 @@ func main() {
 	for i := range totalIndex {
 		totalIndex[i] = make([]int, height)
 	}
-	splitters := make([][]*splitter, width)
+	splitters = make([][]*splitter, width)
 	for i, r := range manifoldDiagram {
 		if r == SPLITTER {
 			row, col := rowCol(i, width)
@@ -73,8 +74,8 @@ func main() {
 		}
 	}
 	sourceCol := width / 2
-	printNumSplitsPartOne(splitters, 0, sourceCol)
+	printNumSplitsPartOne(0, sourceCol)
 	fmt.Println(totalCount)
-	count := printNumSplitsPartTwo(splitters, 0, sourceCol)
+	count := printNumSplitsPartTwo(0, sourceCol)
 	fmt.Println(count)
 }
